@@ -1,0 +1,212 @@
+# Frequently Asked Questions (FAQ)
+
+## Account & Profile
+
+### How do I create an account?
+Download the app, tap Sign Up, enter your email and create a password. Verify your email to activate your account.
+
+### Can I change my username?
+Yes, go to Profile → Edit Profile → Username. You can change it anytime.
+
+### How do I delete my account?
+Go to Settings → Account → Delete Account. This action is permanent and cannot be undone.
+
+### What is the Privacy Matrix?
+Privacy Matrix lets you control who can see your profile, posts, streams, and other content. Choose from Public, Friends Only, or Private presets, or customize each setting individually.
+
+## KYC Verification
+
+### Why do I need KYC verification?
+KYC (Know Your Customer) verification is required to:
+- Withdraw money from wallet
+- Sell items on marketplace
+- Receive tips from live streaming
+- Access premium features
+
+### How long does KYC verification take?
+Most verifications are completed within 24-48 hours. You'll receive a notification when reviewed.
+
+### What documents are accepted?
+- Government-issued ID (passport, driver's license, national ID)
+- Clear photos with all text readable
+- Valid (not expired) documents
+
+### My KYC was rejected. What should I do?
+Check the rejection reason in your profile. Common issues:
+- Blurry or unclear photos
+- Expired documents
+- Name mismatch with account
+- Document not fully visible
+
+Re-submit with corrected documents.
+
+### Can I use someone else's ID?
+No. Using another person's ID violates our terms and will result in permanent ban.
+
+## Wallet & Payments
+
+### How do I add money to my wallet?
+Go to Wallet → + Add Credits → Choose amount → Pay with card. Credits are added instantly.
+
+### What payment methods are accepted?
+We accept major credit and debit cards (Visa, Mastercard, American Express).
+
+### How do I send a tip to someone?
+In their profile or chat → Send Money → Enter username → Choose amount → Add optional message → Send.
+
+### What is the minimum withdrawal amount?
+Minimum withdrawal is $10.
+
+### How long do withdrawals take?
+- Bank Transfer (free): 3-5 business days
+- Instant Payout (1.5% fee): Within 1 hour
+
+### Are there any fees?
+- Adding credits: No fee
+- Sending tips: No fee
+- Bank withdrawals: Free
+- Instant withdrawals: 1.5% fee
+- Marketplace transactions: 5% platform fee for sellers
+
+### What if a payment fails?
+Check your card details and try again. Contact support if the issue persists.
+
+## Marketplace
+
+### How does escrow protection work?
+When a buyer pays, money is held securely by us. It's only released to the seller after:
+- Buyer receives item
+- Buyer submits delivery proof
+- Buyer confirms item is as described
+- 48-hour dispute window passes
+
+### What if the item doesn't arrive?
+You have 48 hours after expected delivery to open a dispute. We'll review evidence and may issue a full refund.
+
+### What is delivery proof?
+Photos you take when receiving a package showing:
+- Unopened package
+- Tracking label
+- Delivery timestamp
+This protects both buyers and sellers.
+
+### Can I cancel an order?
+- Before shipping: Contact seller to request cancellation
+- After shipping: Only through dispute process if item is not as described
+
+### How do I list an item for sale?
+Marketplace → + New Listing → Add photos → Description → Price → Condition → Publish
+
+### What makes a good listing?
+- Multiple clear photos from different angles
+- Honest description of condition
+- Accurate measurements or specifications
+- Fair pricing based on condition
+- Detailed shipping and return policy
+
+## CAP (Capture Evidence)
+
+### What is CAP?
+Capture Evidence (CAP) is our verified photo/video feature that records with dual cameras and embeds metadata like GPS location, timestamp, and device information for authenticity.
+
+### Why use CAP instead of regular camera?
+CAP provides verifiable proof with:
+- Dual camera recording (front + back)
+- Automatic GPS tagging
+- Tamper-proof timestamp
+- Device metadata
+- Evidence-grade quality
+
+Perfect for documentation, disputes, or journalism.
+
+### Can I edit CAP photos?
+No. CAP evidence cannot be edited to maintain integrity. You can retake before uploading.
+
+### What is dual camera mode?
+Records from front and back cameras simultaneously, showing both what you're capturing and the person capturing it. Available in:
+- Picture-in-Picture (PIP)
+- Split Screen
+
+### Does CAP work offline?
+CAP requires:
+- GPS signal
+- Internet connection
+- IMU sensors
+- Dual camera capability
+
+All must show green tick before capturing.
+
+## Live Streaming
+
+### How do I start a live stream?
+Tap + → Go Live → Add title and description → Choose category → Start Stream
+
+### Can I monetize my streams?
+Yes, viewers can send tips during your stream. You need KYC verification to withdraw earnings.
+
+### What are stream rules?
+- Keep content appropriate for general audience
+- No nudity or sexual content
+- No harassment or hate speech
+- Respect all viewers
+- Follow all community guidelines
+
+### Can I save my streams?
+Public streams are automatically saved to your profile. Private streams are not saved.
+
+### How do I end a stream?
+Tap End Stream → Confirm. You'll see viewer statistics and earnings.
+
+## Security & Privacy
+
+### How do I enable Two-Factor Authentication (2FA)?
+Settings → Security → Two-Factor Authentication → Turn On → Follow setup instructions
+
+### What is biometric security?
+Add Face ID or Touch ID to secure your account. Go to Settings → Security → Manage Biometrics
+
+### How can I see active sessions?
+Settings → Security → Active Sessions shows all devices logged into your account. You can logout from any device remotely.
+
+### Someone else is using my account. What should I do?
+1. Change your password immediately
+2. Enable 2FA
+3. Go to Active Sessions and logout all other devices
+4. Contact support if unauthorized activity occurred
+
+## Support
+
+### How do I contact support?
+- In-app: Settings → Help & Support
+- Email: support@app.com
+- Response time: Usually within 24 hours
+
+### How do I report a user or content?
+Tap the three dots menu on any post, profile, or stream → Report → Choose reason → Submit
+
+### What happens when I report something?
+Our moderation team reviews all reports within 24 hours. Action is taken based on severity and policy violations.
+
+### Can I appeal a moderation decision?
+Yes, you can appeal within 30 days through Settings → Support → Appeal Decision
+
+## Troubleshooting
+
+### App is crashing
+1. Update to latest version
+2. Restart your device
+3. Clear app cache
+4. Reinstall app if issue persists
+
+### Videos not playing
+- Check internet connection
+- Try lowering video quality in settings
+- Clear app cache
+
+### Can't upload photos/videos
+- Check storage space
+- Verify permissions are granted
+- Check file size (max 100MB per file)
+
+### Notifications not working
+Settings → Notifications → Enable all relevant categories and ensure device settings allow notifications.
