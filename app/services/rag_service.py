@@ -11,7 +11,7 @@ import asyncio
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, DirectoryLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
@@ -64,15 +64,17 @@ class RAGService:
             self.is_initialized = False
     
     def _init_embeddings(self):
-        """Initialize embedding model (runs in thread)"""
+        """Initialize Gemini embedding model (runs in thread)"""
         try:
-            # Use lightweight embedding model
-            self.embeddings = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
-                model_kwargs={'device': 'cpu'},
-                encode_kwargs={'normalize_embeddings': True}
+            gemini_key = os.getenv("GEMINI_API_KEY")
+            if not gemini_key:
+                raise ValueError("GEMINI_API_KEY is required for Gemini embeddings")
+
+            self.embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/text-embedding-004",
+                google_api_key=gemini_key
             )
-            logger.info("Embeddings model loaded")
+            logger.info("Gemini embeddings loaded")
         except Exception as e:
             logger.error(f"Error loading embeddings: {e}")
             raise

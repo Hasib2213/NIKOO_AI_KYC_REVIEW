@@ -19,11 +19,12 @@ pandas
 # RAG and AI enhancements
 langchain
 langchain-groq
+langchain-google-genai
+google-generativeai
 langchain-community
 langchain-text-splitters
 langchain-core
 faiss-cpu
-sentence-transformers
 tiktoken
 pypdf
 python-docx
