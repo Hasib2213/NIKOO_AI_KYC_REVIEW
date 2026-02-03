@@ -9,7 +9,6 @@ import asyncio
 # Import enhanced services
 from app.services.context_manager import context_manager
 from app.services.rag_service import rag_service
-from app.services.permission_service import permission_service
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -252,18 +251,18 @@ async def generate_context_aware_response(
     thread_id: str, 
     user_id: str,
     use_rag: bool = True,
-    use_user_context: bool = True
+    use_user_context: bool = False
 ) -> str:
     """
     Generate a response with enhanced context awareness.
-    Uses context manager, RAG, and user permissions for better responses.
+    Uses context manager and RAG for better responses.
     
     Args:
         messages: List of messages (dict with 'role' and 'content')
         thread_id: ID of the thread
         user_id: ID of the user
         use_rag: Whether to use RAG for document context
-        use_user_context: Whether to include user-specific data
+        use_user_context: Deprecated (user-specific data is not used)
         
     Returns:
         Context-aware response string
@@ -278,12 +277,8 @@ async def generate_context_aware_response(
         # Get current user message
         current_message = messages[-1].get("content", "") if messages else ""
         
-        # Get user context data if permitted
+        # User data is not used for responses
         user_data = None
-        if use_user_context:
-            user_data = await permission_service.get_user_context(user_id)
-            if user_data:
-                logger.info(f"Retrieved user context for {user_id}: {list(user_data.keys())}")
         
         # Build optimized context using context manager
         optimized_messages = await context_manager.build_context_prompt(

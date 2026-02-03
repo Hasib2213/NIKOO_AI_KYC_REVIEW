@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import db_client
 from app.database.KYCdatabase import MongoDB
-from app.routers import liveness, kyc, webhook, AI_Chat_threads, content_copilot, onboarding
+from app.routers import kyc, webhook, AI_Chat_threads
 from app.services.rag_service import rag_service
 from config import settings
 import logging
@@ -70,13 +70,10 @@ app.add_middleware(
 
 
 # Include routers from app.routers
-#app.include_router(liveness.router)
 app.include_router(kyc.router)
 app.include_router(webhook.router)
 app.include_router(AI_Chat_threads.router)
-app.include_router(content_copilot.router)
-app.include_router(onboarding.router)
-    
+
 
 @app.get("/")
 async def root():

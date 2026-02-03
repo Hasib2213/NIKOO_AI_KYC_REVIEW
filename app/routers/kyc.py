@@ -3,7 +3,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional
 from app.services.verification_service import VerificationService
-# from app.utils.auth import verify_api_key
+from fastapi import File, UploadFile, Form
+from app.models.schemas import (
+    StartKYCRequest,
+    StartKYCResponse,
+    ScanDocumentResponse,
+    VerifySelfieResponse,
+    CheckStatusResponse
+)
+
 import logging
 
 # NOTE: All endpoints return ACTUAL Sumsub results via 'sumsub_data' field
@@ -12,84 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["ID Verification"])
 
-# ============ LIVENESS FLOW ============
-
-# class StartLivenessRequest(BaseModel):
-#     user_id: str
-
-# class StartLivenessResponse(BaseModel):
-#     session_id: str
-#     status: str
-
-# class ProcessLivenessRequest(BaseModel):
-#     session_id: str
-#     image_base64: str
-
-# class ProcessLivenessResponse(BaseModel):
-#     is_live: bool
-#     confidence: float
-#     message: str
-
-# class CompleteLivenessRequest(BaseModel):
-#     session_id: str
-#     user_id: str
-
-# class CompleteLivenessResponse(BaseModel):
-#     message: str
-#     status: str
-
-# BIO-008 - DEPRECATED: Use /api/v1/liveness/start from liveness.py router instead
-# All liveness endpoints moved to dedicated routers/liveness.py file
-
-# BIO-009 - DEPRECATED: Use /api/v1/liveness/check from liveness.py router instead
-
-# BIO-010 - DEPRECATED: Use /api/v1/liveness/complete from liveness.py router instead
-
 # ============ KYC FLOW ============
-
-class StartKYCRequest(BaseModel):
-    user_id: str
-
-class StartKYCResponse(BaseModel):
-    kyc_session_id: str
-    status: str
-
-
-from fastapi import File, UploadFile, Form
-
-class ScanDocumentRequest(BaseModel):
-    kyc_session_id: str
-    doc_type: str = "PASSPORT"
-    country: str = "USA"
-    image_base64: Optional[str] = None
-
-class ScanDocumentResponse(BaseModel):
-    image_id: str
-    document_detected: bool
-    message: str
-    sumsub_data: Optional[dict] = None  # Complete Sumsub response
-
-class VerifySelfieRequest(BaseModel):
-    kyc_session_id: str
-    image_base64: Optional[str] = None
-
-class VerifySelfieResponse(BaseModel):
-    image_id: str
-    matches_document: bool
-    face_match_score: float
-    message: str
-    sumsub_data: Optional[dict] = None  # Complete Sumsub response
-
-class CheckStatusResponse(BaseModel):
-    # status: str
-    # progress: int
-    # message: str
-    sumsub_data: Optional[dict] = None  # Complete Sumsub response
-
-class CompleteKYCResponse(BaseModel):
-    message: str
-    status: str
-    sumsub_data: Optional[dict] = None  # Complete Sumsub response
 
 # kyc start
 @router.post("/kyc/start", response_model=StartKYCResponse)
@@ -156,7 +87,7 @@ async def scan_document_back(
     country: str = Form("USA"),
     image_file: UploadFile = File(None),
     image_base64: str = Form(None),
-   # api_key: str = Depends(verify_api_key)
+  
 ):
     """ Scan ID - Back"""
     try:
@@ -193,7 +124,7 @@ async def verify_selfie(
     kyc_session_id: str = Form(...),
     image_file: UploadFile = File(None),
     image_base64: str = Form(None),
-   ## api_key: str = Depends(verify_api_key)
+   
 ):
     """Take a Selfie"""
     try:
@@ -233,7 +164,7 @@ async def verify_selfie(
 @router.get("/kyc/status/{kyc_session_id}", response_model=CheckStatusResponse)
 async def check_kyc_status(
     kyc_session_id: str,
-    #api_key: str = Depends(verify_api_key)
+    
 ):
     """Verification in Progress"""
     try:
@@ -252,33 +183,6 @@ async def check_kyc_status(
     except Exception as e:
         logger.error(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed")
-
-# BIO-015
-# @router.post("/kyc/complete", response_model=CompleteKYCResponse)
-# async def complete_kyc(
-#     kyc_session_id: str,
-#     user_id: str,
-#     api_key: str = Depends(verify_api_key)
-# ):
-#     """BIO-015: KYC Approved"""
-#     try:
-#         service = VerificationService()
-#         result = await service.complete_kyc_verification(
-#             kyc_session_id,
-#             user_id
-#         )
-        
-#         if not result.get("success"):
-#             raise HTTPException(status_code=400, detail=result.get("error"))
-        
-#         return CompleteKYCResponse(
-#             message=result.get("message", "KYC Approved"),
-#             status=result.get("status", "approved"),
-#             sumsub_data=result  # Return complete Sumsub response
-#         )
-#     except Exception as e:
-#         logger.error(f"Error: {str(e)}")
-#         raise HTTPException(status_code=500, detail="Failed")
 
 # Status Check
 @router.get("/user/{user_id}/status")
