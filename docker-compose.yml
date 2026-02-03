@@ -9,8 +9,7 @@ services:
     ports:
       - "8075:8000"
     environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - MODEL=${MODEL:-llama-3.3-70b-versatile}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - TEMPERATURE=${TEMPERATURE:-0.7}
       - MAX_TOKENS=${MAX_TOKENS:-1000}
       - MONGODB_URL=${MONGODB_URL}

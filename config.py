@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     # ───────────────────────────────────────────────
     #                   LLM / Groq
     # ───────────────────────────────────────────────
-    GROQ_API_KEY: str = ""                    # will be overridden by .env
-    MODEL: str = "llama-3.1-8b-instant"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3-flash-preview"
     TEMPERATURE: float = 0.7
     MAX_TOKENS: int = 1000
 
@@ -47,10 +47,9 @@ class Settings(BaseSettings):
     SUMSUB_APP_TOKEN: str = ""
     SUMSUB_WEBHOOK_SECRET: str = ""
     SUMSUB_LEVEL_NAME: str = "basic-kyc-level"
-    SUMSUB_BASE_URL: str = "https://api.sandbox.sumsub.com"
+    SUMSUB_BASE_URL: str = "https://api.sumsub.com"
 
     # Kept your original endpoints (no change)
-    SUMSUB_LIVENESS_ENDPOINT: str = "/v1/liveness/verify"
     SUMSUB_DOCUMENT_ENDPOINT: str = "/v1/document/verify"
 
     # ───────────────────────────────────────────────

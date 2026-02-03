@@ -13,12 +13,10 @@ httpx
 python-jose
 passlib
 websockets
-groq
 pandas
 
 # RAG and AI enhancements
 langchain
-langchain-groq
 langchain-google-genai
 google-generativeai
 langchain-community

@@ -22,7 +22,7 @@ class MongoDBClient:
             self.db = self.client[settings.DATABASE_NAME]
             # Use new collection name for storing chat messages
             self.messages_collection = self.db['AI_Chat_messages']
-            self.threads_collection = self.db['AI_threads']
+            self.threads_collection = self.db['threads']
             # Add new collections for enhanced features
             self.user_permissions_collection = self.db['AI_user_permissions']
             self.context_metadata_collection = self.db['AI_context_metadata']
