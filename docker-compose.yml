@@ -5,11 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: chatbot-ai
+    container_name: nikoo-ai
     ports:
       - "8075:8000"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MODEL=${MODEL:-gemini-pro}
       - TEMPERATURE=${TEMPERATURE:-0.7}
       - MAX_TOKENS=${MAX_TOKENS:-1000}
       - MONGODB_URL=${MONGODB_URL}
