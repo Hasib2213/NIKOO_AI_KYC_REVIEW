@@ -7,7 +7,6 @@ from app.schema.schema import (
 )
 
 from app.database import db_client
-from app.database.KYCdatabase import MongoDB
 from config import settings
 import asyncio
 import uuid

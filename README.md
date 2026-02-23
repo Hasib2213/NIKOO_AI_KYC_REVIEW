@@ -1,26 +1,25 @@
-# Nikoo AI - Mobile App Support Assistant
+# Nikoo AI - Chatbot Assistant
 
-A powerful FastAPI-based AI chatbot powered by Groq API that provides intelligent 24/7 support for mobile applications with context-aware conversations, thread management, and MongoDB integration.
+A FastAPI-based AI chatbot powered by Google Gemini API that provides intelligent 24/7 support with context-aware conversations, thread management, RAG (Retrieval-Augmented Generation), and MongoDB integration.
 
 ## 🎯 Features
 
-- **Context-Aware Conversations**: Multi-turn conversations with thread management
-- **Auto-Summary Generation**: Automatic conversation summaries every 10 messages
+- **Context-Aware Conversations**: Multi-turn WebSocket conversations with thread management
+- **RAG (Retrieval-Augmented Generation)**: Smart document context retrieval with FAISS indexing
+- **Auto-Summary Generation**: Automatic conversation summaries
 - **MongoDB Integration**: Persistent storage for threads and chat history
-- **24/7 Availability**: Real-time AI-powered support
+- **24/7 Availability**: Real-time AI-powered support via WebSocket
 - **Multi-Language Support**: Responds in user's preferred language
-- **Fast Responses**: Powered by Groq's fast LLM inference
-- **Streamlit Dashboard**: Interactive web interface for testing
-- **REST API**: Easy integration with frontend applications
-- **Multi-Stage Docker Build**: Optimized Docker image for production
-- **Health Monitoring**: Built-in health check endpoints
+- **Fast Responses**: Powered by Google Gemini API
+- **Production-Ready**: Console logging, configurable CORS, environment-based settings
+- **Docker Support**: Multi-stage Docker build for optimized deployment
 
 ## 📋 Requirements
 
 - Python 3.11+ or Docker
-- Groq API Key (Get from https://console.groq.com)
-- MongoDB (local or cloud instance)
-- Dependencies: FastAPI, Uvicorn, Groq, Pydantic, PyMongo, Streamlit
+- Google Gemini API Key (Get from https://ai.google.dev)
+- MongoDB (local or cloud instance - MongoDB Atlas recommended)
+- Dependencies in `requirements.txt`
 
 ## 🚀 Quick Start
 
@@ -28,7 +27,7 @@ A powerful FastAPI-based AI chatbot powered by Groq API that provides intelligen
 
 #### 1. Clone or Download the Project
 ```bash
-cd nikoo_ai
+cd Nikoo_ai_kyc_review
 ```
 
 #### 2. Create Virtual Environment
@@ -50,31 +49,49 @@ pip install -r requirements.txt
 #### 4. Configure Environment Variables
 Create a `.env` file in the project root:
 ```env
-GROQ_API_KEY=your_groq_api_key_here
-MODEL=llama-3.3-70b-versatile
+# Google Gemini API
+GEMINI_API_KEY=your_google_gemini_api_key
+GEMINI_MODEL=gemini-3-flash-preview
 TEMPERATURE=0.7
 MAX_TOKENS=1000
-MONGODB_URI=mongodb://localhost:27017
-DATABASE_NAME=nikoo_ai_db
+
+# Database
+MONGODB_URL=mongodb://localhost:27017
+DATABASE_NAME=nikoo_ai
+
+# Application
+API_TITLE=Nikoo AI Chatbot
+API_VERSION=1.0.0
+DEBUG=False
+
+# CORS (Production)
+CORS_ORIGINS=["http://localhost:3000"]
+HOST=0.0.0.0
+PORT=8000
 ```
 
-**Get your API Key:**
-1. Go to https://console.groq.com
-2. Sign up or log in
+**Get your Google Gemini API Key:**
+1. Go to https://ai.google.dev
+2. Sign up or log in with Google Account
 3. Create an API key
 4. Copy and paste it in `.env` file
 
-#### 5. Run the Application
+#### 5. Ensure MongoDB is Running
 ```bash
-# Option A: FastAPI Backend
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+# Local MongoDB (if installed)
+mongod
 
-# Option B: Streamlit Dashboard (in separate terminal)
-streamlit run streamlit_app.py
+# Or use MongoDB Atlas (cloud)
+# Update MONGODB_URL with your connection string
 ```
 
-The API will be available at: `http://127.0.0.1:8000`  
-The Streamlit app will be at: `http://localhost:8501`
+#### 6. Run the Application
+```bash
+# Start the FastAPI server
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+The API will be available at: `http://127.0.0.1:8000`
 
 ---
 
@@ -86,12 +103,25 @@ The Streamlit app will be at: `http://localhost:8501`
 #### 1. Configure Environment Variables
 Create a `.env` file in the project root:
 ```env
-GROQ_API_KEY=your_groq_api_key_here
-MODEL=llama-3.3-70b-versatile
+# Google Gemini API
+GEMINI_API_KEY=your_google_gemini_api_key
+GEMINI_MODEL=gemini-3-flash-preview
 TEMPERATURE=0.7
 MAX_TOKENS=1000
-MONGODB_URI=mongodb://localhost:27017
-DATABASE_NAME=nikoo_ai_db
+
+# Database
+MONGODB_URL=mongodb://mongo:27017
+DATABASE_NAME=nikoo_ai
+
+# Application
+API_TITLE=Nikoo AI Chatbot
+API_VERSION=1.0.0
+DEBUG=False
+
+# CORS
+CORS_ORIGINS=["http://localhost:3000"]
+HOST=0.0.0.0
+PORT=8000
 ```
 
 #### 2. Build and Run with Docker Compose
@@ -103,7 +133,7 @@ docker-compose up --build
 docker-compose up -d --build
 
 # View logs
-docker-compose logs -f chatbot
+docker-compose logs -f
 
 # Stop the container
 docker-compose down
@@ -116,17 +146,18 @@ docker build -t chatbot-ai .
 
 # Run the container
 docker run -p 8000:8000 \
-  -e GROQ_API_KEY=your_groq_api_key_here \
-  -e MODEL=llama-3.3-70b-versatile \
-  -e TEMPERATURE=0.7 \
-  -e MAX_TOKENS=1000 \
+  -e GEMINI_API_KEY=your_google_gemini_api_key \
+  -e GEMINI_MODEL=gemini-3-flash-preview \
+  -e MONGODB_URL=mongodb://localhost:27017 \
+  -e DATABASE_NAME=nikoo_ai \
   chatbot-ai
 ```
 
 The API will be available at: `http://localhost:8000`
 
 #### Docker Compose Services
-- **chatbot**: Main API service running on port 8000
+- **chatbot**: Main WebSocket API service running on port 8000
+- **mongo**: MongoDB database service (if included in docker-compose.yml)
 
 ---
 
@@ -186,370 +217,201 @@ docker rmi chatbot-ai
 
 ## 📚 API Endpoints
 
-### Health Check
+### Root Endpoint
 ```bash
-GET /health
+GET /
 ```
 **Response:**
 ```json
 {
-  "status": "ok",
-  "model": "llama-3.3-70b-versatile",
-  "database": "connected"
+  "status": "AI running",
+  "websocket_endpoint_example": "ws://localhost:8000/ws/chat/{thread_id}/{user_id}"
 }
 ```
 
-### Context-Aware Chat (Recommended)
-```bash
-POST /api/chat
+### WebSocket Chat Endpoint
+```
+ws://localhost:8000/ws/chat/{thread_id}/{user_id}
 ```
 
-**Request:**
+**Description:** Real-time chat via WebSocket with thread and user identification
+
+**Parameters:**
+- `thread_id`: Unique conversation thread identifier
+- `user_id`: Unique user identifier
+
+**Message Format (Send):**
 ```json
 {
-  "user_id": "user123",
-  "thread_id": "optional-thread-id",
-  "content": "How do I add money to my wallet?"
+  "message": "Your question or message here",
+  "context": "Optional context information"
 }
 ```
 
-**Response:**
+**Message Format (Receive):**
 ```json
 {
-  "response": "To add money:\n- Go to Wallet → + Add Credits\n- Choose amount ($10, $25, $50, $100, $250, $500 or custom)\n- Pay with card → Balance added instantly.",
-  "thread_id": "uuid-thread-id",
-  "message_count": 2,
-  "success": true,
-  "error": null
+  "type": "response",
+  "message": "AI response text",
+  "thread_id": "thread_id",
+  "timestamp": "2024-02-23T10:00:00"
 }
 ```
-
-### Generate Summary
-```bash
-POST /api/summary
-```
-
-**Request:**
-```json
-{
-  "thread_id": "uuid-thread-id",
-  "user_id": "user123"
-}
-```
-
-**Response:**
-```json
-{
-  "summary": "User inquired about adding money to wallet and was provided with step-by-step instructions...",
-  "success": true,
-  "error": null
-}
-```
-
-### List User Threads
-```bash
-GET /api/threads?user_id=user123
-```
-
-**Response:**
-```json
-{
-  "threads": [
-    {
-      "thread_id": "uuid-1",
-      "message_count": 10,
-      "created_at": "2026-01-20T10:30:00",
-      "updated_at": "2026-01-20T11:45:00",
-      "summary": "Discussion about wallet features"
-    }
-  ],
-  "count": 1
-}
-```
-
-### Get Thread Messages
-```bash
-POST /api/thread/messages
-```
-
-**Request:**
-```json
-{
-  "thread_id": "uuid-thread-id",
-  "user_id": "user123",
-  "limit": 50
-}
-```
-
-### Delete Thread
-```bash
-DELETE /api/thread/{thread_id}?user_id=user123
-```
-
-## 📁 Project Structure
-
-```
-nikoo_ai/
-├── main.py                    # FastAPI application & endpoints
-├── config.py                  # Configuration settings
-├── streamlit_app.py          # Streamlit dashboard
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables
-├── Dockerfile                # Multi-stage Docker build
-├── docker-compose.yml        # Docker Compose setup
-├── README.md                 # Documentation
-└── app/
-    ├── database.py           # MongoDB connection & operations
-    ├── LLM_Service/
-    │   └── ai_service.py     # Groq AI service & context management
-    ├── prompts/
-    │   └── system_prompt.py  # System prompts for AI
-    └── schema/
-        └── schema.py         # Pydantic models & validation
-```
-
-## 🔧 Configuration
-
-Create a `.env` file in the project root:
-
-```env
-# Groq API Configuration
-GROQ_API_KEY=your_groq_api_key_here
-MODEL=llama-3.3-70b-versatile
-TEMPERATURE=0.7
-MAX_TOKENS=1000
-
-# MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017
-DATABASE_NAME=nikoo_ai_db
-
-# Optional: MongoDB Atlas (Cloud)
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
-```
-
-**Get your Groq API Key:**  
-Visit: https://console.groq.com → Create API Key
-
-**MongoDB Setup:**
-- Local: Install MongoDB Community Edition
-- Cloud: Use MongoDB Atlas (free tier available)
-
-## 📚 API Endpoints
-
-### Health Check
-```bash
-GET /health
-```
-
-### Context-Aware Chat
-```bash
-POST /api/chat
-```
-
-**Request:**
-```json
-{
-  "user_id": "user123",
-  "thread_id": "optional-thread-id",
-  "content": "Your question here"
-}
-```
-
-**Response:**
-```json
-{
-  "response": "AI response here",
-  "thread_id": "uuid-thread-id",
-  "message_count": 2,
-  "success": true,
-  "error": null
-}
-```
-
-## 📝 Example Requests
-
-### Using cURL
-```bash
-# Context-aware chat
-curl -X POST 'http://127.0.0.1:8000/api/chat' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "user_id": "user123",
-  "content": "How do I reset my password?"
-}'
-
-# Get user threads
-curl -X GET 'http://127.0.0.1:8000/api/threads?user_id=user123'
-
-# Generate summary
-curl -X POST 'http://127.0.0.1:8000/api/summary' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "thread_id": "your-thread-id",
-  "user_id": "user123"
-}'
-```
-
-### Using Python
-```python
-import requests
-
-# Context-aware chat
-response = requests.post(
-    'http://127.0.0.1:8000/api/chat',
-    json={
-        'user_id': 'user123',
-        'content': 'How do I reset my password?'
-    }
-)
-print(response.json())
-
-# List threads
-threads = requests.get(
-    'http://127.0.0.1:8000/api/threads',
-    params={'user_id': 'user123'}
-)
-print(threads.json())
-```
-
-### Using JavaScript
-```javascript
-// Context-aware chat
-const response = await fetch('http://127.0.0.1:8000/api/chat', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({
-    user_id: "user123",
-    content: "How do I reset my password?"
-  })
-});
-const data = await response.json();
-console.log(data);
-
-// List threads
-const threads = await fetch('http://127.0.0.1:8000/api/threads?user_id=user123');
-const threadData = await threads.json();
-console.log(threadData);
-```
-
-## 🐛 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| `GROQ_API_KEY not configured` | Check `.env` file, get key from https://console.groq.com |
-| `MongoDB connection failed` | Ensure MongoDB is running (local) or check URI for cloud |
-| `Model has been decommissioned` | Update MODEL in `.env` to supported model |
-| `Address already in use` | Change port: `uvicorn main:app --port 8001` |
-| `Connection refused` | Ensure uvicorn is running and internet is connected |
-| `Empty response` | Check max_tokens setting and message content |
-| `Database not connected` | Verify MONGODB_URI and DATABASE_NAME in `.env` |
-| `Thread not found` | Ensure thread_id exists and belongs to user_id |
-
-## 💡 Key Features Explained
-
-### Context-Aware Conversations
-- Each user can have multiple conversation threads
-- Messages are stored with context for better responses
-- AI can reference previous messages in the same thread
-- Automatic thread creation on first message
-
-### Auto-Summary Generation
-- System automatically generates summaries every 10 messages
-- Summaries help in quick conversation overview
-- Stored in MongoDB for future reference
-- Can be manually triggered via API
-
-### Thread Management
-- Create, list, and delete conversation threads
-- Each thread maintains its own context
-- Thread metadata includes message count and timestamps
-- Easy retrieval of conversation history
-
-## 🔐 Security
-
-- API keys are protected in `.env` (not committed to Git)
-- Input validation on all endpoints with Pydantic
-- User-based thread isolation (users can only access their own threads)
-- Environment variables stored locally only
-- Error handling prevents sensitive data leakage
-- MongoDB connection secured with authentication options
-- Multi-stage Docker build reduces attack surface
-
-## 🚀 Production Deployment
-
-### Docker Deployment (Recommended)
-```bash
-# Build and deploy
-docker-compose up -d --build
-
-# View logs
-docker-compose logs -f
-
-# Scale if needed
-docker-compose up -d --scale chatbot=3
-```
-
-### Environment Variables for Production
-```env
-GROQ_API_KEY=your_production_key
-MODEL=llama-3.3-70b-versatile
-TEMPERATURE=0.5
-MAX_TOKENS=1500
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/
-DATABASE_NAME=nikoo_ai_production
-```
-
-### Best Practices
-- Use MongoDB Atlas for production database
-- Enable MongoDB authentication
-- Set up proper logging and monitoring
-- Use environment-specific `.env` files
-- Configure CORS for your frontend domain
-- Set up SSL/TLS certificates
-- Use Docker secrets for sensitive data
-
-## 📊 Streamlit Dashboard
-
-The project includes an interactive Streamlit dashboard for testing:
-
-```bash
-streamlit run streamlit_app.py
-```
-
-**Features:**
-- User ID input
-- Thread selection
-- Real-time chat interface
-- Thread history viewer
-- Summary generation
-- Message count display
-
-## 🛠️ Tech Stack
-
-- **Backend**: FastAPI (Python 3.11)
-- **AI/LLM**: Groq API (Llama 3.3 70B)
-- **Database**: MongoDB
-- **Frontend**: Streamlit (Dashboard)
-- **Containerization**: Docker, Docker Compose
-- **Validation**: Pydantic v2
-- **Server**: Uvicorn (ASGI)
-
-## 📈 Performance
-
-- **Response Time**: < 2 seconds (with Groq)
-- **Docker Image Size**: ~450MB (multi-stage build)
-- **Memory Usage**: ~200MB (idle)
-- **Concurrent Users**: Scales with Uvicorn workers
-- **Database**: MongoDB handles thousands of threads
-
-## 📄 License
-
-This project is part of the Nikoo AI Mobile App Support Platform.
 
 ---
 
-**Developed with ❤️ for intelligent customer support**
+## 🏗️ Project Structure
 
-**Contact:** nikoo@app.com  
-**Version:** 2.0.0  
-**Last Updated:** January 2026
+```
+Nikoo_ai_kyc_review/
+├── app/
+│   ├── database/
+│   │   ├── __init__.py
+│   │   ├── AIchatbotDatabase.py      # MongoDB sync client
+│   │   └── KYCdatabase.py            # Async MongoDB (commented - KYC removed)
+│   ├── documents/
+│   │   ├── content_policy.txt        # RAG knowledge base
+│   │   ├── faq.txt                   # FAQs for RAG
+│   │   └── faiss_index/              # Vector index for RAG
+│   ├── LLM_Service/
+│   │   └── ai_service.py             # Google Gemini integration
+│   ├── logs/                          # Application logs (console only in production)
+│   ├── models/
+│   │   └── schemas.py                # Pydantic models
+│   ├── prompts/
+│   │   └── system_prompt.py          # AI system prompt
+│   ├── routers/
+│   │   └── AI_Chat_threads.py        # WebSocket chat endpoints
+│   ├── services/
+│   │   ├── context_manager.py        # Context handling
+│   │   ├── rag_service.py            # RAG implementation
+│   │   └── verification_service.py   # Verification logic
+│   ├── schema/
+│   │   └── schema.py                 # Data schemas
+│   └── utils/
+│       ├── auth.py                   # Authentication utilities
+│       └── exceptions.py             # Custom exceptions
+├── config.py                          # Environment configuration
+├── main.py                            # FastAPI application entry
+├── requirements.txt                   # Python dependencies
+├── Dockerfile                         # Multi-stage Docker build
+├── docker-compose.yml                 # Docker Compose services
+└── README.md                          # This file
+```
+
+---
+
+## ⚙️ Configuration
+
+All settings are environment-based (see `.env` file):
+
+**API Settings:**
+- `API_TITLE`: API title (default: "Chatbot API")
+- `API_VERSION`: API version (default: "1.0.0")
+- `DEBUG`: Debug mode (default: False - must be False in production)
+
+**LLM Settings:**
+- `GEMINI_API_KEY`: Google Gemini API key (required)
+- `GEMINI_MODEL`: Model name (default: "gemini-3-flash-preview")
+- `TEMPERATURE`: Response creativity (0.0-1.0, default: 0.7)
+- `MAX_TOKENS`: Maximum response length (default: 1000)
+
+**Database Settings:**
+- `MONGODB_URL`: MongoDB connection string
+- `DATABASE_NAME`: Database name (default: "nikoo_ai")
+
+**Server Settings:**
+- `HOST`: Server host (default: "0.0.0.0" for Docker, "127.0.0.1" for local)
+- `PORT`: Server port (default: 8000)
+- `CORS_ORIGINS`: Allowed CORS origins (default: ["http://localhost:3000"])
+
+---
+
+## 🔒 Production Deployment Checklist
+
+- ✅ Set `DEBUG=False` in environment
+- ✅ Configure `CORS_ORIGINS` for your domains (not `["*"]`)
+- ✅ Use strong `GEMINI_API_KEY` and MongoDB credentials
+- ✅ Use MongoDB Atlas (cloud) instead of local MongoDB
+- ✅ Enable logging via container logs (not file-based)
+- ✅ Set `HOST=0.0.0.0` and configure reverse proxy (Nginx)
+- ✅ Use HTTPS/TLS for WebSocket connections (wss://)
+- ✅ Set up container orchestration (Kubernetes, Docker Swarm)
+- ✅ Configure health checks and monitoring
+- ✅ Use environment variables for all secrets (.env in container)
+
+---
+
+## 🛠️ Troubleshooting
+
+### MongoDB Connection Failed
+```
+Error: Failed to connect to MongoDB
+Solution: Ensure MongoDB is running and MONGODB_URL is correct
+- Local: mongodb://localhost:27017
+- Atlas: mongodb+srv://user:password@cluster.mongodb.net/database
+```
+
+### Google Gemini API Error
+```
+Error: GEMINI_API_KEY is invalid or expired
+Solution:
+1. Get new key from https://ai.google.dev
+2. Update .env file
+3. Restart application
+```
+
+### WebSocket Connection Failed
+```
+Error: WebSocket connection refused
+Solution:
+1. Ensure API is running on correct port
+2. Check CORS_ORIGINS configuration
+3. Use correct thread_id and user_id in URL
+```
+
+### Docker Build Fails
+```
+Error: Docker image build fails
+Solution:
+1. Ensure requirements.txt is valid
+2. Check Dockerfile syntax
+3. Increase Docker memory if needed
+```
+
+---
+
+## 📝 Environment Variables Example
+
+```env
+# .env file (never commit to git)
+
+# Required
+GEMINI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxx
+
+# Optional (defaults will be used if not set)
+GEMINI_MODEL=gemini-3-flash-preview
+TEMPERATURE=0.7
+MAX_TOKENS=1000
+
+MONGODB_URL=mongodb://localhost:27017
+DATABASE_NAME=nikoo_ai
+
+API_TITLE=Nikoo AI Chatbot
+API_VERSION=1.0.0
+DEBUG=False
+
+CORS_ORIGINS=["http://localhost:3000"]
+HOST=0.0.0.0
+PORT=8000
+```
+
+---
+
+## 📜 License
+
+This project is proprietary and confidential - Nikoo AI
+
+## 🤝 Support
+
+For issues or questions, contact the development team.
