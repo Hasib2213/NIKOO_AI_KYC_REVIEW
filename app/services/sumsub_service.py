@@ -1,9 +1,4 @@
 # app/services/sumsub_service.py
-"""
-Sumsub Service integrated with UI Design Flow:
-BIO-008 to BIO-010: Face Liveness Detection
-BIO-011 to BIO-015: KYC Verification
-"""
 
 import hashlib
 import hmac

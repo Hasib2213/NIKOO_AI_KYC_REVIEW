@@ -1,4 +1,5 @@
-from groq import Groq
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from config import settings
 from app.prompts.system_prompt import SYSTEM_PROMPT, SUMMARY_PROMPT
 from typing import List, Dict, Optional
@@ -13,28 +14,57 @@ from app.services.permission_service import permission_service
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Groq client initialization
+# Gemini client initialization
 try:
-    if not settings.GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY is not set in environment")
-    client = Groq(api_key=settings.GROQ_API_KEY)
-    logger.info("Groq client initialized successfully")
+    if not settings.GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY is not set in environment")
+    model_name = settings.GEMINI_MODEL or settings.MODEL
+    client = ChatGoogleGenerativeAI(
+        api_key=settings.GEMINI_API_KEY,
+        model=model_name,
+        temperature=settings.TEMPERATURE,
+        max_output_tokens=settings.MAX_TOKENS,
+    )
+    logger.info("Gemini client initialized successfully")
 except Exception as e:
-    logger.error(f"Failed to initialize Groq client: {str(e)}")
+    logger.error(f"Failed to initialize Gemini client: {str(e)}")
     client = None
 
-class GroqService:
+class GeminiService:
     def __init__(self):
-        self.model_name = settings.MODEL
+        self.model_name = settings.GEMINI_MODEL or settings.MODEL
         self.client = client
         
         if not self.client:
-            raise RuntimeError("Groq client is not initialized")
+            raise RuntimeError("Gemini client is not initialized")
         
-        if not self.model_name:
-            raise ValueError("MODEL is not configured")
-        
-        logger.info(f"GroqService initialized with model: {self.model_name}")
+        logger.info(f"GeminiService initialized with model: {self.model_name}")
+
+    @staticmethod
+    def _to_lc_messages(messages: List[dict]):
+        lc_messages = []
+        for msg in messages:
+            role = msg.get("role")
+            content = msg.get("content", "")
+            if role == "system":
+                lc_messages.append(SystemMessage(content=content))
+            elif role == "assistant":
+                lc_messages.append(AIMessage(content=content))
+            else:
+                lc_messages.append(HumanMessage(content=content))
+        return lc_messages
+
+    @staticmethod
+    def _normalize_content(content) -> str:
+        if isinstance(content, list):
+            parts = []
+            for item in content:
+                if isinstance(item, dict) and "text" in item:
+                    parts.append(item["text"])
+                else:
+                    parts.append(str(item))
+            return "".join(parts)
+        return str(content)
 
     async def generate_response(self, messages: List[dict], user_id: str) -> str:
         try:
@@ -58,21 +88,18 @@ class GroqService:
                     "content": msg["content"]
                 })
 
-            # Groq API call
-            logger.info(f"Calling Groq API with {len(formatted_messages)} messages for user {user_id}")
-            # Offload blocking Groq API call to a thread to avoid blocking the event loop
+            # Gemini API call
+            logger.info(f"Calling Gemini API with {len(formatted_messages)} messages for user {user_id}")
+            # Offload blocking Gemini API call to a thread to avoid blocking the event loop
             response = await asyncio.to_thread(
-                self.client.chat.completions.create,
-                model=self.model_name,
-                messages=formatted_messages,
-                temperature=settings.TEMPERATURE,
-                max_tokens=settings.MAX_TOKENS
+                self.client.invoke,
+                self._to_lc_messages(formatted_messages),
             )
             
-            if not response.choices or not response.choices[0].message:
-                raise ValueError("Empty response from Groq API")
+            if not response or response.content is None:
+                raise ValueError("Empty response from Gemini API")
             
-            return response.choices[0].message.content.strip()
+            return self._normalize_content(response.content).strip()
         
         except ValueError as e:
             logger.warning(f"Validation error for user {user_id}: {str(e)}")
@@ -83,16 +110,19 @@ class GroqService:
 
 # Singleton instance
 try:
-    groq_service = GroqService()
-    logger.info("GroqService singleton created")
+    gemini_service = GeminiService()
+    logger.info("GeminiService singleton created")
 except Exception as e:
-    logger.error(f"Failed to create GroqService: {str(e)}")
-    groq_service = None
+    logger.error(f"Failed to create GeminiService: {str(e)}")
+    gemini_service = None
+
+# Backward compatibility alias
+groq_service = gemini_service
 
 async def generate_groq_response(messages: List[dict], user_id: str) -> str:
-    if not groq_service:
-        raise RuntimeError("GroqService is not available")
-    return await groq_service.generate_response(messages, user_id)
+    if not gemini_service:
+        raise RuntimeError("GeminiService is not available")
+    return await gemini_service.generate_response(messages, user_id)
 
 async def get_thread_messages(thread_id: str, user_id: str, limit: int = 10) -> List[Dict]:
     """
@@ -152,8 +182,8 @@ async def generate_summary(thread_id: str, user_id: str) -> str:
     Returns:
         Summary string
     """
-    if not groq_service:
-        raise RuntimeError("GroqService is not available")
+    if not gemini_service:
+        raise RuntimeError("GeminiService is not available")
     
     try:
         # Fetch last 10 messages from thread via database
@@ -192,20 +222,17 @@ Conversation:
         
         logger.info(f"Generating summary for thread {thread_id}, user {user_id}")
         
-        # Call Groq API for summary
-        # Offload blocking Groq API call to a thread
+        # Call Gemini API for summary
+        # Offload blocking Gemini API call to a thread
         response = await asyncio.to_thread(
-            groq_service.client.chat.completions.create,
-            model=groq_service.model_name,
-            messages=formatted_messages,
-            temperature=0.3,  # Lower temperature for more consistent summaries
-            max_tokens=300
+            gemini_service.client.invoke,
+            GeminiService._to_lc_messages(formatted_messages)
         )
         
-        if not response.choices or not response.choices[0].message:
-            raise ValueError("Empty response from Groq API")
+        if not response or response.content is None:
+            raise ValueError("Empty response from Gemini API")
         
-        summary = response.choices[0].message.content.strip()
+        summary = GeminiService._normalize_content(response.content).strip()
         logger.info(f"Summary generated successfully for thread {thread_id}")
         
         return summary
@@ -241,8 +268,8 @@ async def generate_context_aware_response(
     Returns:
         Context-aware response string
     """
-    if not groq_service:
-        raise RuntimeError("GroqService is not available")
+    if not gemini_service:
+        raise RuntimeError("GeminiService is not available")
     
     try:
         if not messages:
@@ -294,19 +321,16 @@ async def generate_context_aware_response(
             f"User context: {bool(user_data)})"
         )
         
-        # Call Groq API
+        # Call Gemini API
         response = await asyncio.to_thread(
-            groq_service.client.chat.completions.create,
-            model=groq_service.model_name,
-            messages=formatted_messages,
-            temperature=settings.TEMPERATURE,
-            max_tokens=settings.MAX_TOKENS
+            gemini_service.client.invoke,
+            GeminiService._to_lc_messages(formatted_messages)
         )
         
-        if not response.choices or not response.choices[0].message:
-            raise ValueError("Empty response from Groq API")
+        if not response or response.content is None:
+            raise ValueError("Empty response from Gemini API")
         
-        return response.choices[0].message.content.strip()
+        return GeminiService._normalize_content(response.content).strip()
         
     except ValueError as e:
         logger.warning(f"Validation error for thread {thread_id}: {str(e)}")
@@ -315,4 +339,4 @@ async def generate_context_aware_response(
         logger.error(f"Error generating context-aware response: {str(e)}")
         # Fallback to basic response
         logger.info("Falling back to basic response generation")
-        return await groq_service.generate_response(messages, user_id)
+        return await gemini_service.generate_response(messages, user_id)

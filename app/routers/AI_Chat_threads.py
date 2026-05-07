@@ -57,8 +57,8 @@ async def auto_generate_summary(thread_id: str, user_id: str):
 async def generate(request: AIRequest):
     try:
         # Validate API key
-        if not settings.GROQ_API_KEY:
-            logger.error("GROQ_API_KEY is not set")
+        if not settings.GEMINI_API_KEY:
+            logger.error("GEMINI_API_KEY is not set")
             raise ValueError("API key is not configured")
         
         messages = [msg.model_dump() for msg in request.messages]
@@ -221,8 +221,8 @@ async def thread_messages_combined(
         
         # CHAT MODE: If messages provided
         if request.messages and len(request.messages) > 0:
-            if not settings.GROQ_API_KEY:
-                logger.error("GROQ_API_KEY is not set")
+            if not settings.GEMINI_API_KEY:
+                logger.error("GEMINI_API_KEY is not set")
                 raise ValueError("API key is not configured")
             
             messages_list = [msg.model_dump() for msg in request.messages]
@@ -300,10 +300,10 @@ async def thread_messages_combined(
 async def health():
     try:
         # Check if API key is configured
-        if not settings.GROQ_API_KEY:
+        if not settings.GEMINI_API_KEY:
             return {"status": "error", "message": "API key not configured"}
         
-        return {"status": "ok", "model": settings.MODEL}
+        return {"status": "ok", "model": settings.GEMINI_MODEL or settings.MODEL}
     except Exception as e:
         logger.error(f"Health check error: {str(e)}")
         return {"status": "error", "message": str(e)}
@@ -338,7 +338,7 @@ async def websocket_chat(websocket: WebSocket, thread_id: str, user_id: str):
     
     try:
         # Validate API key
-        if not settings.GROQ_API_KEY:
+        if not settings.GEMINI_API_KEY:
             await websocket.send_json({
                 "type": "error",
                 "content": "API key is not configured",
