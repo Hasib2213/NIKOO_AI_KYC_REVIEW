@@ -26,6 +26,8 @@ faiss-cpu
 tiktoken
 pypdf
 python-docx
-resemblyzer
+speechbrain
+torch
+scipy
 
 
