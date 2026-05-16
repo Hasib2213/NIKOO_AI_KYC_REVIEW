@@ -67,6 +67,13 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE: int = 10 * 1024 * 1024   # 10MB
     REQUEST_TIMEOUT: int = 30
 
+    # ───────────────────────────────────────────────
+    #                 Azure Speech
+    # ───────────────────────────────────────────────
+    AZURE_SPEECH_KEY: str = ""
+    AZURE_SPEECH_REGION: str = "southeastasia"
+    AZURE_SPEECH_ENDPOINT: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

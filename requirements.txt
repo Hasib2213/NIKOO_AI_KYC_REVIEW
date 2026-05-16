@@ -26,6 +26,6 @@ faiss-cpu
 tiktoken
 pypdf
 python-docx
-resemblyzer
+pydub
 
 
