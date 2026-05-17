@@ -14,8 +14,13 @@ services:
       - MAX_TOKENS=${MAX_TOKENS:-1000}
       - MONGODB_URL=${MONGODB_URL}
       - DATABASE_NAME=${DATABASE_NAME:-nikoo_ai}
+      - HF_HOME=/cache/huggingface
+      - HUGGINGFACE_HUB_CACHE=/cache/huggingface/hub
+      - TORCH_HOME=/cache/torch
     volumes:
       - .:/app
+      - hf-cache:/cache/huggingface
+      - torch-cache:/cache/torch
     restart: unless-stopped
     networks:
       - chatbot-network
@@ -23,3 +28,7 @@ services:
 networks:
   chatbot-network:
     driver: bridge
+
+volumes:
+  hf-cache:
+  torch-cache:

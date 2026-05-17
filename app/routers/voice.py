@@ -25,7 +25,10 @@ async def enroll_voice(
     if not result.get("success"):
         raise HTTPException(status_code=400, detail=result.get("error", "Voice enrollment failed"))
 
-    return {"message": "Voice enrolled successfully"}
+    return {
+        "voice_enrolled": True,
+        "message": "Voice enrolled successfully"
+    }
 
 
 @router.post("/verify/{user_id}")

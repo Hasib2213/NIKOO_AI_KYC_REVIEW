@@ -16,7 +16,12 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install CPU-only PyTorch stack first to avoid GPU/CUDA wheels
+RUN pip install --user --no-warn-script-location \
+    --index-url https://download.pytorch.org/whl/cpu \
+    torch torchaudio
+
+# Install the rest of the Python dependencies after torch is already present
 RUN pip install --upgrade pip && \
     pip install --user --no-warn-script-location -r requirements.txt
 
@@ -29,12 +34,18 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH=/root/.local/bin:$PATH
+ENV HF_HOME=/cache/huggingface
+ENV HUGGINGFACE_HUB_CACHE=/cache/huggingface/hub
+ENV TORCH_HOME=/cache/torch
 
 # Copy Python dependencies from builder
 COPY --from=builder /root/.local /root/.local
 
 # Copy application code
 COPY . .
+
+# Create writable cache directories for model downloads
+RUN mkdir -p /cache/huggingface/hub /cache/torch
 
 # Expose port
 EXPOSE 8000

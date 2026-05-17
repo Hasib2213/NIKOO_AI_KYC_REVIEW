@@ -27,7 +27,6 @@ tiktoken
 pypdf
 python-docx
 speechbrain
-torch
 scipy
 
 
