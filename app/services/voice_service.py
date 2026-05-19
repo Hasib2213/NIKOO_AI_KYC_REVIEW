@@ -148,7 +148,7 @@ class VoiceVerificationService:
         ]
 
         average_similarity = sum(similarities) / len(similarities)
-        voice_match = average_similarity >= 0.5
+        voice_match = average_similarity >= 0.75
 
         return {
             "success": True,
